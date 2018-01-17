@@ -1,0 +1,172 @@
+
+* return type deduction
+
+* changes to "if", "switch":
+extension to if/while/etc. syntax (name?)
+constexpr-if
+
+* deduction guides
+
+* structured bindings
+
+* fold expressions
+
+[[nodiscard]]
+	- attribute lists, ie. [[attr: a, foo(x), b]]
+	- parameter packs ok here
+
+other handy attributes: [[deprecated]] (C++11), [[fallthrough]] (switch statements)
+
+expections are part of the type signature
+
+noexcept 
+
+final (C++11)
+
+parameter packs (C++11)
+
+nested namespaces
+
+std::invoke(), std::apply(), std::make_from_tuple()
+
+inline variables
+	- a "little" feature that's very nice!
+	- resolves the long-standing issue of having to declare things "extern" when
+	you "just" want a variable
+	- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0386r2.pdf
+
+deduction guides
+	- standard library: 
+	- automatic when:
+	- you can build your own...
+
+ctors can do template deduction:
+	auto p = make_pair(1, foo()); // not make_pair<int, my_weird_type>
+
+lambdas:
+	- auto params (C++14)
+	- capture expressions
+	- capture *this in initializer-list (C++17)
+
+constexpr
+
+variable templates
+
+A sweet technique from Gabby:
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0138r2.pdf
+
+A tiny thing, but significant in practice:
+	- std::string now has a non-const .data() member function
+
+---- More library goodies than I can even get started on!
+
+polymorphic allocators
+	- the topic of /many/ talks at CppCon 2017
+	- I tried these with Erlang. It made something that was respectably tricky
+	in C++98... almost trivial. Spoiled my fun! ;-)
+
+std::byte
+
+std::filesystem (!)
+	- this will be a very important library to know about for many application domains
+	- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0218r0.html
+
+parallel STL
+	- not shown because my library doesn't have it (yet!)
+	- very important: "easily" parallelize many operations
+
+algorithms
+
+std::invoke(), std::apply():
+	- apply vs. invoke (sounds like a good presentation topic! :->)
+		- apply() calls a Callable with a /tuple/ of parameters
+		- invoke() calls a Callable with its /own/ parameters (think parameter pack)
+	- std::apply passes its arguments to f 
+	- cf. make_from_tuple<> (P. Halpern)
+
+string_view
+	- see Marshall Clow's CppCon session, linked below
+	- not a bad article:
+	https://skebanga.github.io/string-view/
+
+any, variant, optional
+	- std::any<> performs type erasure; eliminates one of the remaining use-cases for bare void*.
+	- std::variant<> is a discriminated union (does not erase types, lets you select from a list of possible types)
+	- std::optional<> is simliar to Haskell's Maybe monad. It is /itself/ always valid, but may or may not contain
+	a value. To get a value, you check for its presence and then dereference. (Just dereferencing is UB.)
+
+std::quoted (C++14)
+
+binary literals
+
+- constexpr "all the things!" (C++17)
+	- lambdas are now IMPLICITLY constexpr (if possible-- and, you need to use
+	them in a context where a constexpr value is produced)
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0170r1.pdf
+
+- a number of kewl metaprogramming things (std::conjunction and friends are really nice)
+	- void_t
+	- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3911.pdf
+
+- "modernizing using-delcarations" is a really badass feature, worth study:
+	template <typename... Ts>
+	struct Overloader : Ts... {
+	    using Ts::operator()...;
+	    // […]
+	};
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0195r1.html
+
+- make_from_tuple<> drastically simplifies cases where you want to construct a runtime
+object from, say, a metaprogramming-created tuple:
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0209r2.pdf
+
+- template<auto>
+	- template <auto v> struct S; // v is deduced
+	- a *gulp* Stack Overflow post with some helpful examples:
+		https://stackoverflow.com/questions/38026884/advantages-of-auto-in-template-parameters-in-c17
+	- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0127r2.html
+
+- std::uncaught_exceptions (note the 's'!)
+	http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4152.pdf
+
+- brace-initialization rules CHANGE compared to C++11 and C++14:
+    - nicely written, concise explaination here:
+		- http://mariusbancila.ro/blog/2017/04/13/cpp17-new-rules-for-auto-deduction-from-braced-init-list/
+	- http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3922.html
+
+- __has_include is a super useful feature!
+	http://en.cppreference.com/w/cpp/preprocessor/include
+
+- Pablo Halpern's PMR stuff
+
+
+(Skipping features like make_unique<> that are "invisible" now that they're there!)
+
+* Copy elision rules have changed important for C++17. This almost always is an improvement,
+but the central way it changes your code is that you can relax the way you return things in
+nearly every case where it will generate a prvalue (a "thing"):
+http://en.cppreference.com/w/cpp/language/copy_elision
+
+------------------------------
+
+Further resources:
+
+* isocpp.org
+	Tour
+	https://isocpp.org/tour
+
+	FAQ
+	https://isocpp.org/faq
+
+* A now-older presentation I did for PDXCPP on variadic templates. Shows some basics and
+gives useful background and further reading:
+	https://github.com/PDXCPP/presentations/blob/master/2014/vtemplates0.odp
+
+* Have not inspected this yet, but looks useful:
+	https://github.com/AnthonyCalandra/modern-cpp-features
+	...better yet, WRITE YOUR OWN! :-) Explore.
+
+* European conference: http://meetingcpp.com/
+
+* CppCon videos (ALL online for FREE!!! :->):
+	https://www.youtube.com/channel/UCMlGfpWw-RUdWX_JbLCukXg	
